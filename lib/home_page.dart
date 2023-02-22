@@ -24,9 +24,13 @@ class _QuizPageState extends State<QuizPage> {
   List<String> preguntas = [
     '¿Los glóbulos rojos viven 4 meses?',
     '¿El cuerpo humano adulto tiene 306 huesos?',
-    '¿La cobalamina es una vitamina?'
+    '¿La cobalamina es una vitamina?',
+    '¿El cereal es un carbohidrato?',
+    '¿Hacer esta app fue facil?'
   ];
+  List<bool> respuestas = [true, false, true, true, false];
   int numeroPregunta = 0;
+  int aciertos = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -59,14 +63,7 @@ class _QuizPageState extends State<QuizPage> {
               child: TextButton(
                   onPressed: () {
                     setState(() {
-                      puntuacion.add(
-                        const Icon(
-                          Icons.check,
-                          color: Colors.green,
-                        ),
-                      );
-                      numeroPregunta++;
-                      preguntas[numeroPregunta];
+                      resultado(true);
                     });
                   },
                   child: const Text(
@@ -88,14 +85,7 @@ class _QuizPageState extends State<QuizPage> {
               child: TextButton(
                   onPressed: () {
                     setState(() {
-                      puntuacion.add(
-                        const Icon(
-                          Icons.close,
-                          color: Colors.red,
-                        ),
-                      );
-                      numeroPregunta++;
-                      preguntas[numeroPregunta];
+                      resultado(false);
                     });
                   },
                   child: const Text('Falso',
@@ -110,6 +100,54 @@ class _QuizPageState extends State<QuizPage> {
           )
         ],
       ),
+    );
+  }
+
+  resultado(respuesta) {
+    bool resultado = respuesta == respuestas[numeroPregunta];
+    if (resultado) {
+      aciertos++;
+      puntuacion.add(const Icon(
+        Icons.check,
+        color: Colors.green,
+      ));
+    } else {
+      puntuacion.add(const Icon(
+        Icons.close,
+        color: Colors.red,
+      ));
+    }
+    if (numeroPregunta != preguntas.length - 1) {
+      numeroPregunta++;
+    } else {
+      numeroPregunta = 0;
+      alertaFinal(context);
+    }
+  }
+
+  alertaFinal(BuildContext context) {
+    AlertDialog alertaFinal = AlertDialog(
+      title: const Text("Juego terminado"),
+      content: Text("Puntuación: $aciertos"),
+      actions: [
+        TextButton(
+          child: const Text("Volver a jugar"),
+          onPressed: () {
+            Navigator.pop(context);
+            setState(() {
+              aciertos = 0;
+              puntuacion.clear();
+            });
+          },
+        ),
+        WillPopScope(onWillPop: () async => false, child: const Text(''))
+      ],
+    );
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alertaFinal;
+      },
     );
   }
 }
